@@ -1,19 +1,40 @@
 package br.com.mariojp.solid.srp;
+import br.com.mariojp.solid.srp.ReceiptFormatter;
+import br.com.mariojp.solid.srp.TaxCalculator;
 
-public class ReceiptService {
-	public String generate(Order order) {
+public class ReceiptService  {
+	
+	  private final TaxCalculator taxCalculator; //injeções internas de cada classe
+	    private final ReceiptFormatter formatter; // baixo acoplamento - receiptService apenas usa as dependências, mas não sabe como são feitas.
+	    
+	    // não instanciamos via objeto - como new TaxCalculator() - porque aumenta a dependência das classes concretas.
+	    // Mantém o SRP dessa forma.
+
+	    public ReceiptService(TaxCalculator taxCalculator, ReceiptFormatter formatter) { // construtor com as instâncias de duas classes
+	        this.taxCalculator = taxCalculator;
+	        this.formatter = formatter;
+	    }
+	
+	// calcula apenas o subtotal
+	public double CalculateSubtotal(Order order) {
 		double subtotal = order.getItems().stream().mapToDouble(i -> i.getUnitPrice() * i.getQuantity()).sum();
-		double tax = subtotal * 0.10; //Taxa 10 fixa :(
-		double total = subtotal + tax;
-		StringBuilder sb = new StringBuilder(); //Formatando o Recibo
-		sb.append("=== RECIBO ===\n");
-		for (var i : order.getItems()) {
-			sb.append(i.getName()).append(" x").append(i.getQuantity()).append(" = ").append(i.getUnitPrice() * i.getQuantity())
-					.append("\n");
-		}
-		sb.append("Subtotal: ").append(subtotal).append("\n");
-		sb.append("Tax: ").append(tax).append("\n");
-		sb.append("Total: ").append(total).append("\n");
-		return sb.toString();
+		return subtotal;
 	}
+	
+	// calcula as taxas 
+	public double TaxCalculator(double subtotal) {
+		double tax = taxCalculator.calculateTax(subtotal);
+		return tax;
+	}
+	
+	//gera o recibo 
+	public String GenerateReciept(Order order) {
+		 double subtotal = order.getItems().stream().mapToDouble(i -> i.getUnitPrice() * i.getQuantity()).sum();
+		 double tax = taxCalculator.calculateTax(subtotal);
+		 double total = subtotal + tax;
+		 
+	    return formatter.FormatReceipt(subtotal, tax, total);
+	}
+	
+	
 }
