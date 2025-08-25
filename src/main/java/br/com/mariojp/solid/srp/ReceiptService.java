@@ -4,11 +4,11 @@ import br.com.mariojp.solid.srp.TaxCalculator;
 
 public class ReceiptService  {
 	
-	  private final TaxCalculator taxCalculator;
-	    private final ReceiptFormatter formatter;
+	  private final TaxCalculator taxCalculator; //injeções internas de cada classe
+	    private final ReceiptFormatter formatter; // baixo acoplamento - receiptService apenas usa as dependências, mas não sabe como são feitas.
 	    
-	    // não instancia via objeto - como new TaxCalculator() - porque aumenta a dependência das classes concretas.
-	    // 
+	    // não instanciamos via objeto - como new TaxCalculator() - porque aumenta a dependência das classes concretas.
+	    // Mantém o SRP dessa forma.
 
 	    public ReceiptService(TaxCalculator taxCalculator, ReceiptFormatter formatter) { // construtor com as instâncias de duas classes
 	        this.taxCalculator = taxCalculator;
@@ -21,15 +21,20 @@ public class ReceiptService  {
 		return subtotal;
 	}
 	
+	// calcula as taxas 
 	public double TaxCalculator(double subtotal) {
-		double tax = taxCalculator.CalculateTax(subtotal);
+		double tax = taxCalculator.calculateTax(subtotal);
 		return tax;
 	}
 	
-	public String GenerateReciept(List<Double> items) {
-		double tax = //instancia o objeto tax e o método pra calcular
-		 double subtotal = items.stream().mapToDouble(Double::doubleValue).sum();
+	//gera o recibo 
+	public String GenerateReciept(Order order) {
+		 double subtotal = order.getItems().stream().mapToDouble(i -> i.getUnitPrice() * i.getQuantity()).sum();
+		 double tax = taxCalculator.calculateTax(subtotal);
 		 double total = subtotal + tax;
+		 
+	    return formatter.FormatReceipt(subtotal, tax, total);
 	}
+	
 	
 }
