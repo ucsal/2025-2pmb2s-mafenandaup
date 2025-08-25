@@ -7,7 +7,7 @@ public class Main {
 		Order o = new Order();
 		o.add(new Item("Café", 8.0, 2)); // 16
 		o.add(new Item("Bolo", 12.5, 1)); // 12.5 -> subtotal 28.5
-		String receipt = new ReceiptService().generate(o);
+		String receipt = new ReceiptService().GenerateReciept(o);
 		System.out.println(receipt);
 		
 	}
